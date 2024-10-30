@@ -86,8 +86,8 @@ def generate_follower_network_exhaustive(out_deg_dist:list,
 
     edge_list = [] #Initialize the edge list.
 
-    # For each node suggest a cast to a possible node.
-    # If possible node connection does not exist and offered node has acceptance for the indegree, accept the offer.
+            # For each node suggest a cast to a possible node.
+            # If possible node connection does not exist and offered node has acceptance for the indegree, accept the offer.
 
     for NODE in range(len(out_deg_dist)):
         similarity_list = user_similarity_matrix[:,NODE]
@@ -96,32 +96,28 @@ def generate_follower_network_exhaustive(out_deg_dist:list,
         casting_right = out_deg_dist[NODE]
 
         for CAST in range(int(casting_right.item())):
-            CONDITION = False
-            attempt = 0
-            while not CONDITION:
-                POSSIBLE_CAST = np.random.choice(range(user_similarity_matrix.shape[0]), size = 1, p = similarity_list).item()
-                print('\x1b[0;30;47m' +f'Suggesting {NODE} ->> {POSSIBLE_CAST}'+ '\x1b[0m')
-                if (NODE,POSSIBLE_CAST) in edge_list:
-                    print('\x1b[0;37;41m' +f'Rejected: Multiple {NODE} ->> {POSSIBLE_CAST}'+ '\x1b[0m')
-                    similarity_list[POSSIBLE_CAST] = 0
-                    similarity_list = (similarity_list) / (np.sum(similarity_list))
-                elif in_deg_dist[POSSIBLE_CAST] < 1:
-                    print('\x1b[0;37;41m' +f'Rejected: No Right {NODE} ->> {POSSIBLE_CAST}'+ '\x1b[0m')
-                    similarity_list[POSSIBLE_CAST] = 0
-                    similarity_list = (similarity_list) / (np.sum(similarity_list))
+            POSSIBLE_CAST = np.random.choice(range(user_similarity_matrix.shape[0]), size = 1, p = similarity_list).item()
+            print('\x1b[0;30;47m' +f'Suggesting {NODE} ->> {POSSIBLE_CAST}'+ '\x1b[0m')
+            if (NODE,POSSIBLE_CAST) in edge_list:
+                print('\x1b[0;37;41m' +f'Rejected: Multiple {NODE} ->> {POSSIBLE_CAST}'+ '\x1b[0m')
+                similarity_list[POSSIBLE_CAST] = 0
+                similarity_list = (similarity_list) / (np.sum(similarity_list))
+                    
+            elif in_deg_dist[POSSIBLE_CAST] < 1:
+                print('\x1b[0;37;41m' +f'Rejected: No Right {NODE} ->> {POSSIBLE_CAST}'+ '\x1b[0m')
+                similarity_list[POSSIBLE_CAST] = 0
+                similarity_list = (similarity_list) / (np.sum(similarity_list))
 
-                else:
-                    print('\x1b[0;30;46m' +f'Accepted {NODE} ->> {POSSIBLE_CAST}'+ '\x1b[0m')
-                    edge_list.append((NODE,POSSIBLE_CAST))
-                    in_deg_dist[POSSIBLE_CAST] = in_deg_dist[POSSIBLE_CAST] - 1
-                    CONDITION = True
+            else:
+                print('\x1b[0;30;46m' +f'Accepted {NODE} ->> {POSSIBLE_CAST}'+ '\x1b[0m')
+                edge_list.append((NODE,POSSIBLE_CAST))
+                in_deg_dist[POSSIBLE_CAST] = in_deg_dist[POSSIBLE_CAST] - 1
 
-                if attempt == generation_tolerance:
-                    raise TimeoutError('Could not generate a network within the given tolerance')
 
-                attempt += 1
 
+    
     return ig.Graph(n = user_similarity_matrix.shape[0], edges = edge_list, directed = True)
+
 
 
 def generate_retweet_network(follower_following_network:ig.Graph,
@@ -154,8 +150,7 @@ def generate_retweet_network(follower_following_network:ig.Graph,
                     
                 else:
                     POSSIBLE_CAST = np.random.choice(range(similarity_matrix.shape[0]), size = 1, p = similarity_list).item()
-
-                print('\x1b[0;30;44m' + f'Retweet {NODE} ->> {POSSIBLE_CAST}, Feed Observation' + '\x1b[0m')
+                    print('\x1b[0;30;44m' + f'Retweet {NODE} ->> {POSSIBLE_CAST}, Feed Observation' + '\x1b[0m')
 
                 rt_list.append((NODE,POSSIBLE_CAST))
         except Exception as e:
@@ -212,9 +207,10 @@ if __name__ == "__main__":
                                                    generation_tolerance= 1e4)
     retweet_right = [round(i) for i in np.random.uniform(low = 0, high = 5, size = similarity_matrix.shape[0])]
     rt = generate_retweet_network(network, 
-                             number_of_retweets=retweet_right,
-                             echo_chamber_strength= 0.8,
-                             similarity_matrix= similarity_matrix,
-                             homophily_level= 5,
-                             single_retweet= True)
+                            user_space= some_space,
+                            topic= 1,
+                            number_of_retweets=retweet_right,
+                            echo_chamber_strength= 0.8,
+                            homophily_level= 5,
+                            single_retweet= True)
     print(rt)
